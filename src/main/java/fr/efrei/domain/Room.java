@@ -1,4 +1,8 @@
 package fr.efrei.domain;
 
-public class Room {
+public abstract class Room {
+    protected int roomNumber;
+    protected double pricePerNight;
+    protected boolean isAvailable;
+    protected int floor;
 }
