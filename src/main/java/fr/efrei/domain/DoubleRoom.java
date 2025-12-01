@@ -2,10 +2,10 @@ package fr.efrei.domain;
 
 import java.util.List;
 
-public class Double extends Room{
+public class DoubleRoom extends Room{
     private String bedType;
 
-    public Double(Builder builder){
+    public DoubleRoom(Builder builder){
         this.roomNumber = builder.roomNumber;
         this.pricePerNight = builder.pricePerNight;
         this.bedType = builder.bedType;
@@ -38,7 +38,7 @@ public class Double extends Room{
             return this;
         }
 
-        public Builder copy(Double doubleRoom){
+        public Builder copy(DoubleRoom doubleRoom){
             this.roomNumber = doubleRoom.roomNumber;
             this.pricePerNight = doubleRoom.pricePerNight;
             this.bedType = doubleRoom.bedType;
@@ -46,8 +46,8 @@ public class Double extends Room{
             return this;
         }
 
-        public Double build(){
-            return new Double(this);
+        public DoubleRoom build(){
+            return new DoubleRoom(this);
         }
     }
 }

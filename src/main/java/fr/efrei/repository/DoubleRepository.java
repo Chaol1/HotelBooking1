@@ -1,13 +1,13 @@
 package fr.efrei.repository;
 
-import fr.efrei.domain.Double;
+import fr.efrei.domain.DoubleRoom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DoubleRepository implements IDoubleRepository {
-    private Map<Integer, Double> doubles = new HashMap<>();
+    private Map<Integer, DoubleRoom> doubles = new HashMap<>();
     private static IDoubleRepository repository = null;
 
     private DoubleRepository() {
@@ -22,19 +22,19 @@ public class DoubleRepository implements IDoubleRepository {
     }
 
     @Override
-    public Double create(Double doubleRoom) {
+    public DoubleRoom create(DoubleRoom doubleRoom) {
         if (doubleRoom == null) return null;
         doubles.put(doubleRoom.getRoomNumber(), doubleRoom);
         return doubleRoom;
     }
 
     @Override
-    public Double read(Integer id) {
+    public DoubleRoom read(Integer id) {
         return doubles.get(id);
     }
 
     @Override
-    public Double update(Double doubleRoom) {
+    public DoubleRoom update(DoubleRoom doubleRoom) {
         if (doubleRoom == null) return null;
         doubles.put(doubleRoom.getRoomNumber(), doubleRoom);
         return doubleRoom;
@@ -46,7 +46,7 @@ public class DoubleRepository implements IDoubleRepository {
     }
 
     @Override
-    public List<Double> getAll() {
+    public List<DoubleRoom> getAll() {
         return new ArrayList<>(doubles.values());
     }
 }
