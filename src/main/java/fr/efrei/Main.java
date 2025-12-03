@@ -446,6 +446,8 @@ public class Main {
                         " | Nationality: " + g.getNationality());
             }
         }
+
+        
     }
 
     private static void manageRooms() {
@@ -581,5 +583,166 @@ public class Main {
         double newPrice = getDoubleInput("");
 
         System.out.println("SUCCESS: Price updated to €" + newPrice + " for room " + roomNumber);
+    }
+
+    private static void displayRoomCalendar() {
+        System.out.println("\n ROOM CALENDAR ");
+
+        List<Room> allRooms = getAllRooms();
+
+        System.out.println("\nSelect a room to view its calendar:");
+        for (int i = 0; i < allRooms.size(); i++) {
+            Room room = allRooms.get(i);
+            System.out.println((i + 1) + ". Room " + room.getRoomNumber() +
+                    " (" + getRoomType(room) + ") - €" + room.getPricePerNight() + "/night");
+        }
+
+        System.out.print("\nSelect room number or 0 to view all: ");
+        int choice = getIntInput("");
+
+        if (choice == 0) {
+            displayAllRoomsCalendar();
+        } else if (choice > 0 && choice <= allRooms.size()) {
+            Room selectedRoom = allRooms.get(choice - 1);
+            displaySingleRoomCalendar(selectedRoom);
+        } else {
+            System.out.println("Invalid selection!");
+        }
+    }
+
+    private static void displayAllRoomsCalendar() {
+        System.out.println("\n ALL ROOMS CALENDAR ");
+
+        // Get current month
+        Calendar cal = Calendar.getInstance();
+        int currentMonth = cal.get(Calendar.MONTH);
+        int currentYear = cal.get(Calendar.YEAR);
+
+        System.out.print("Enter month (1-12, default " + (currentMonth + 1) + "): ");
+        int month = getIntInput("");
+        if (month < 1 || month > 12) month = currentMonth + 1;
+
+        System.out.print("Enter year (default " + currentYear + "): ");
+        int year = getIntInput("");
+        if (year < 2024) year = currentYear;
+
+        // Display calendar for each room
+        List<Room> allRooms = getAllRooms();
+        Collections.sort(allRooms, Comparator.comparingInt(Room::getRoomNumber));
+
+        for (Room room : allRooms) {
+            displayRoomMonthCalendar(room, month - 1, year);
+            System.out.println();
+        }
+    }
+
+    private static void displaySingleRoomCalendar(Room room) {
+        System.out.println("\n CALENDAR FOR ROOM " + room.getRoomNumber());
+        System.out.println("Type: " + getRoomType(room));
+        System.out.println("Price: €" + room.getPricePerNight() + "/night");
+        System.out.println("Reservations: " + room.getReservations().size());
+
+        // Get current month
+        Calendar cal = Calendar.getInstance();
+        int currentMonth = cal.get(Calendar.MONTH);
+        int currentYear = cal.get(Calendar.YEAR);
+
+        boolean viewing = true;
+        while (viewing) {
+            System.out.println("\n1. View current month");
+            System.out.println("2. View specific month");
+            System.out.println("3. View next 3 months");
+            System.out.println("4. Back to menu");
+
+            int choice = getIntInput("Your choice: ");
+
+            switch (choice) {
+                case 1:
+                    displayRoomMonthCalendar(room, currentMonth, currentYear);
+                    break;
+                case 2:
+                    System.out.print("Enter month (1-12): ");
+                    int month = getIntInput("");
+                    System.out.print("Enter year: ");
+                    int year = getIntInput("");
+                    if (month >= 1 && month <= 12) {
+                        displayRoomMonthCalendar(room, month - 1, year);
+                    }
+                    break;
+                case 3:
+                    for (int i = 0; i < 3; i++) {
+                        Calendar monthCal = Calendar.getInstance();
+                        monthCal.add(Calendar.MONTH, i);
+                        int m = monthCal.get(Calendar.MONTH);
+                        int y = monthCal.get(Calendar.YEAR);
+                        System.out.println("\n--- " + getMonthName(m) + " " + y + " ---");
+                        displayRoomMonthCalendar(room, m, y);
+                    }
+                    break;
+                case 4:
+                    viewing = false;
+                    break;
+            }
+        }
+    }
+
+    private static void displayRoomMonthCalendar(Room room, int month, int year) {
+        System.out.println("\n--- Room " + room.getRoomNumber() + " - " + getMonthName(month) + " " + year + " ---");
+
+        // Create calendar
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month, 1);
+
+        int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        int firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+
+        // Calendar header
+        System.out.println(" Su Mo Tu We Th Fr Sa");
+
+
+        for (int i = 1; i < firstDayOfWeek; i++) {
+            System.out.print("   ");
+        }
+
+        // Days of month
+        for (int day = 1; day <= daysInMonth; day++) {
+            cal.set(year, month, day);
+            Date currentDate = cal.getTime();
+
+            // Check if day is reserved
+            boolean isReserved = isDateReserved(room, currentDate);
+            boolean isCheckIn = isCheckInDate(room, currentDate);
+            boolean isCheckOut = isCheckOutDate(room, currentDate);
+
+
+            String dayStr = String.format("%2d", day);
+
+            if (isCheckIn) {
+                System.out.print("["+dayStr + "]"); // Check-in
+            } else if (isCheckOut) {
+                System.out.print("(" + dayStr + ")"); // Check-out
+            } else if (isReserved) {
+                System.out.print(" X "); // Occupied
+            } else {
+                System.out.print(" " + dayStr + " "); // Available
+            }
+
+            // New line at end of week
+            if ((day + firstDayOfWeek - 1) % 7 == 0) {
+                System.out.println();
+            }
+        }
+        System.out.println("\n\nLegend: [1] = Check-in, (1) = Check-out, X = Occupied, 1 = Available");
+
+        // Display reservations this month
+        List<Reservation> monthReservations = getReservationsForMonth(room, month, year);
+        if (!monthReservations.isEmpty()) {
+            System.out.println("\nReservations this month:");
+            for (Reservation res : monthReservations) {
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd");
+                System.out.println("- " + sdf.format(res.getArrival()) + " to " +
+                        sdf.format(res.getDeparture()));
+            }
+        }
     }
 }//to delete
