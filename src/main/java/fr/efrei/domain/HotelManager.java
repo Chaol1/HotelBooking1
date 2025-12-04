@@ -5,8 +5,7 @@ import java.util.List;
 public class HotelManager {
     private String id;
     private String name;
-    private List<Room> rooms;
-    private List<Guest> managedGuests;
+
 
     public HotelManager() {
     }
@@ -14,8 +13,6 @@ public class HotelManager {
     public HotelManager(Builder builder) {
         this.id = builder.id;
         this.name = builder.name;
-        this.rooms = builder.rooms;
-        this.managedGuests = builder.managedGuests;
     }
 
     public String getId() {
@@ -26,21 +23,12 @@ public class HotelManager {
         return name;
     }
 
-    public List<Room> getRooms() {
-        return rooms;
-    }
-
-    public List<Guest> getManagedGuests() {
-        return managedGuests;
-    }
 
     @Override
     public String toString() {
         return "HotelManager{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", rooms=" + rooms +
-                ", managedGuests=" + managedGuests +
                 '}';
     }
 
@@ -74,8 +62,6 @@ public class HotelManager {
         public Builder copy(HotelManager hotelManager) {
             this.id = hotelManager.id;
             this.name = hotelManager.name;
-            this.rooms = hotelManager.rooms;
-            this.managedGuests = hotelManager.managedGuests;
             return this;
         }
 
