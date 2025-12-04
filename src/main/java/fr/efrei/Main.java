@@ -935,4 +935,133 @@ public class Main {
         }
         return null;
     }
-}//to delete
+
+    private static List<Room> getAllRooms() {
+        List<Room> allRooms = new ArrayList<>();
+        allRooms.addAll(SingleRepository.getRepository().getAll());
+        allRooms.addAll(DoubleRepository.getRepository().getAll());
+        allRooms.addAll(SuiteRepository.getRepository().getAll());
+        return allRooms;
+    }
+
+    private static String getRoomType(Room room) {
+        if (room instanceof Single) return "Single";
+        if (room instanceof DoubleRoom) return "Double";
+        if (room instanceof Suite) return "Suite";
+        return "Unknown";
+    }
+
+    private static boolean isDateReserved(Room room, Date date) {
+        for (Reservation res : room.getReservations()) {
+            // Date during stay? (excluding checkout day).
+            if (!date.before(res.getArrival()) && date.before(res.getDeparture())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isCheckInDate(Room room, Date date) {
+        for (Reservation res : room.getReservations()) {
+            if (sameDay(date, res.getArrival())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isCheckOutDate(Room room, Date date) {
+        for (Reservation res : room.getReservations()) {
+            if (sameDay(date, res.getDeparture())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean sameDay(Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(date1);
+        cal2.setTime(date2);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private static List<Reservation> getReservationsForMonth(Room room, int month, int year) {
+        List<Reservation> monthReservations = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+
+        for (Reservation res : room.getReservations()) {
+            cal.setTime(res.getArrival());
+            int resMonth = cal.get(Calendar.MONTH);
+            int resYear = cal.get(Calendar.YEAR);
+
+            if (resMonth == month && resYear == year) {
+                monthReservations.add(res);
+            }
+        }
+        return monthReservations;
+    }
+
+    private static String getMonthName(int month) {
+        String[] months = {"January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"};
+        return months[month];
+    }
+
+    private static void displayRoomsByType(String type, List<Room> rooms) {
+        System.out.println("\n" + type.toUpperCase() + " ROOMS (" + rooms.size() + "):");
+        for (Room room : rooms) {
+            System.out.println("- Room " + room.getRoomNumber() +
+                    ": €" + room.getPricePerNight() + "/night");
+        }
+        if (rooms.isEmpty()) {
+            System.out.println("No " + type.toLowerCase() + " rooms available");
+        }
+    }
+
+    private static List<Room> filterRoomsByType(List<Room> rooms, Class<?> type) {
+        List<Room> filtered = new ArrayList<>();
+        for (Room room : rooms) {
+            if (type.isInstance(room)) {
+                filtered.add(room);
+            }
+        }
+        return filtered;
+    }
+
+    private static void suggestAlternativeDates(Date originalCheckIn, Date originalCheckOut) {
+        System.out.println("\n-   SUGGESTED ALTERNATIVES   -");
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(originalCheckIn);
+
+        // test +1 day .
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        Date altCheckIn = cal.getTime();
+        cal.setTime(originalCheckOut);
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        Date altCheckOut = cal.getTime();
+
+        System.out.println("Try: " + dateFormat.format(altCheckIn) + " to " +
+                dateFormat.format(altCheckOut));
+
+        //verify availaibility for this alternative
+        int available = countAvailableRooms(altCheckIn, altCheckOut);
+        if (available > 0) {
+            System.out.println("(" + available + " rooms available)");
+        }
+    }
+
+    private static int countAvailableRooms(Date checkIn, Date checkOut) {
+        int count = 0;
+        for (Room room : getAllRooms()) {
+            if (isRoomAvailableForPeriod(room, checkIn, checkOut)) {
+                count++;
+            }
+        }
+        return count;
+    }
+}
