@@ -35,8 +35,6 @@ public class HotelManager {
     public static class Builder {
         private String id;
         private String name;
-        private List<Room> rooms;
-        private List<Guest> managedGuests;
 
         public Builder setId(String id) {
             this.id = id;
@@ -48,16 +46,6 @@ public class HotelManager {
             return this;
         }
 
-
-        public Builder setRooms(List<Room> rooms) {
-            this.rooms = rooms;
-            return this;
-        }
-
-        public Builder setManagedGuests(List<Guest> managedGuests) {
-            this.managedGuests = managedGuests;
-            return this;
-        }
 
         public Builder copy(HotelManager hotelManager) {
             this.id = hotelManager.id;
